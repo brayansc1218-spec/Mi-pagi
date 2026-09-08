@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111827">
+
+<title>Diagnóstico del dispositivo</title>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  background:#0f1117;
+  color:#f1f5f9;
+  font-family:Arial,sans-serif;
+  padding:18px;
+}
+
+.contenedor{
+  max-width:700px;
+  margin:auto;
+}
+
+.card{
+  background:#181c25;
+  border-radius:20px;
+  padding:22px;
+  box-shadow:0 8px 30px rgba(0,0,0,.35);
+}
+
+h1{
+  font-size:24px;
+  margin:0 0 10px;
+}
+
+.descripcion{
+  color:#aab2bf;
+  line-height:1.5;
+  font-size:14px;
+}
+
+button{
+  width:100%;
+  padding:15px;
+  margin-top:15px;
+  border:0;
+  border-radius:12px;
+  background:white;
+  color:#111827;
+  font-size:16px;
+  font-weight:bold;
+}
+
+.dato{
+  padding:13px 0;
+  border-bottom:1px solid #303642;
+}
+
+.nombre{
+  color:#9ca3af;
+  font-size:13px;
+}
+
+.valor{
+  margin-top:5px;
+  word-break:break-word;
+  line-height:1.4;
+}
+
+.nota{
+  margin-top:18px;
+  color:#8f98a8;
+  font-size:12px;
+  line-height:1.5;
+}
+</style>
+</head>
+
+<body>
+
+<div class="contenedor">
+<div class="card">
+
+<h1>📱 Diagnóstico del dispositivo</h1>
+
+<p class="descripcion">
+Esta página muestra información que tu navegador permite consultar
+sobre este dispositivo.
+</p>
+
+<button onclick="obtenerDatos()">
+Mostrar información
+</button>
+
+<div id="datos"></div>
+
+<p class="nota">
+🔒 Esta página no puede leer contraseñas, archivos, mensajes,
+contactos ni contenido privado del dispositivo.
+Algunos datos pueden estar ocultos por el navegador.
+</p>
+
+</div>
+</div>
+
+<script>
+
+function escapar(texto){
+  return String(texto)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function agregar(nombre,valor){
+
+  return `
+  <div class="dato">
+    <div class="nombre">${escapar(nombre)}</div>
+    <div class="valor">${escapar(valor)}</div>
+  </div>
+  `;
+}
+
+async function obtenerDatos(){
+
+  const n=navigator;
+  const s=screen;
+  const w=window;
+
+  let resultado="";
+
+  /* INFORMACIÓN DEL NAVEGADOR */
+
+  resultado += agregar(
+    "Navegador / User-Agent",
+    n.userAgent || "No disponible"
+  );
+
+  resultado += agregar(
+    "Plataforma",
+    n.platform || "No disponible"
+  );
+
+  resultado += agregar(
+    "Idioma principal",
+    n.language || "No disponible"
+  );
+
+  resultado += agregar(
+    "Idiomas configurados",
+    n.languages ? n.languages.join(", ") : "No disponible"
+  );
+
+  resultado += agregar(
+    "Cookies habilitadas",
+    n.cookieEnabled ? "Sí" : "No"
+  );
+
+  resultado += agregar(
+    "Estado de conexión",
+    n.onLine ? "En línea" : "Sin conexión"
+  );
+
+
+  /* PANTALLA */
+
+  resultado += agregar(
+    "Resolución de pantalla",
+    s.width + " × " + s.height + " px"
+  );
+
+  resultado += agregar(
+    "Área visible",
+    w.innerWidth + " × " + w.innerHeight + " px"
+  );
+
+  resultado += agregar(
+    "Pixel ratio",
+    w.devicePixelRatio
+  );
+
+  resultado += agregar(
+    "Orientación",
+    s.orientation ? s.orientation.type : "No disponible"
+  );
+
+
+  /* HARDWARE */
+
+  resultado += agregar(
+    "Núcleos lógicos del procesador",
+    n.hardwareConcurrency || "No disponible"
+  );
+
+  resultado += agregar(
+    "Memoria RAM aproximada",
+    n.deviceMemory
+      ? n.deviceMemory + " GB aprox."
+      : "No disponible"
+  );
+
+  resultado += agregar(
+    "Pantalla táctil",
+    (n.maxTouchPoints > 0)
+      ? "Sí (" + n.maxTouchPoints + " puntos reportados)"
+      : "No / no disponible"
+  );
+
+
+  /* FECHA Y UBICACIÓN HORARIA */
+
+  resultado += agregar(
+    "Zona horaria",
+    Intl.DateTimeFormat().resolvedOptions().timeZone
+  );
+
+  resultado += agregar(
+    "Hora local",
+    new Date().toString()
+  );
+
+  resultado += agregar(
+    "Hora UTC",
+    new Date().toISOString()
+  );
+
+
+  /* CONEXIÓN */
+
+  if(n.connection){
+
+    resultado += agregar(
+      "Tipo de conexión",
+      n.connection.effectiveType || "No disponible"
+    );
+
+    resultado += agregar(
+      "Velocidad aproximada",
+      n.connection.downlink != null
+        ? n.connection.downlink + " Mbps"
+        : "No disponible"
+    );
+
+    resultado += agregar(
+      "Ahorro de datos",
+      n.connection.saveData ? "Sí" : "No"
+    );
+
+  }else{
+
+    resultado += agregar(
+      "Información de red",
+      "No disponible en este navegador"
+    );
+
+  }
+
+
+  /* USER AGENT CLIENT HINTS */
+
+  if(n.userAgentData){
+
+    resultado += agregar(
+      "Dispositivo móvil",
+      n.userAgentData.mobile ? "Sí" : "No"
+    );
+
+    resultado += agregar(
+      "Marcas del navegador",
+      n.userAgentData.brands
+        ? n.userAgentData.brands
+          .map(x => x.brand + " " + x.version)
+          .join(", ")
+        : "No disponible"
+    );
+
+    try{
+
+      const datosUA =
+        await n.userAgentData.getHighEntropyValues([
+          "architecture",
+          "bitness",
+          "model",
+          "platformVersion",
+          "uaFullVersion"
+        ]);
+
+      resultado += agregar(
+        "Modelo reportado",
+        datosUA.model || "Oculto / no disponible"
+      );
+
+      resultado += agregar(
+        "Arquitectura",
+        datosUA.architecture || "No disponible"
+      );
+
+      resultado += agregar(
+        "Arquitectura en bits",
+        datosUA.bitness || "No disponible"
+      );
+
+      resultado += agregar(
+        "Versión de plataforma
